@@ -191,18 +191,28 @@ echo $result;
 
 ### Deployment Considerations
 
-Before deploying this service to platforms like Vercel or Netlify, note these important considerations:
+⚠️ **IMPORTANT WARNING** ⚠️
 
-- This service requires a **persistent connection** to WhatsApp which may not be suitable for serverless environments.
-- WebSocket connections (used for the QR code interface) may have limitations on certain platforms.
-- The service stores authentication data that needs to persist between deployments.
+This WhatsApp API service **CANNOT** be deployed on serverless platforms like Netlify, Vercel, or standard AWS Lambda due to the following limitations:
 
-For these reasons, this service is best suited for:
-- Traditional hosting (VPS, dedicated server)
-- Container platforms that support long-running processes
-- Cloud services that support WebSockets and persistent storage
+1. **Size Limitations**: The application depends on puppeteer and Chromium, exceeding serverless platforms' size limits (e.g., Netlify's 250MB limit)
+2. **Persistent Connection**: The service requires a persistent WebSocket connection to WhatsApp
+3. **Local Storage**: The authentication data needs persistent local storage between application runs
+4. **Long-Running Process**: The WhatsApp client needs to run continuously, which conflicts with serverless architecture
 
-However, if you still want to deploy to Vercel or Netlify, follow these instructions:
+### Recommended Deployment Options
+
+For proper functionality, we recommend deploying to:
+
+1. **VPS** (DigitalOcean, Linode, AWS EC2)
+2. **Container Platforms** (Docker with Kubernetes/Docker Compose)
+3. **PaaS with Always-On Options**:
+   - Railway.app
+   - Heroku (with paid dynos to prevent sleep)
+   - Google Cloud Run (with min instances set to 1)
+   - Azure Container Apps
+
+### Setting Up on a VPS (Recommended)
 
 ### Deploying to Vercel
 
