@@ -183,8 +183,23 @@ app.post('/send-message', async (req, res) => {
 });
 
 // Simple web interface for scanning QR code
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'index.html'));
+app.get('/', async (req, res) => {
+  try {
+    // Read the HTML file
+    const fs = await import('fs/promises');
+    let html = await fs.readFile(join(__dirname, 'index.html'), 'utf8');
+  
+    // Inject the BACKEND_URL environment variable
+    const backendUrl = process.env.BACKEND_URL || '';
+    html = html.replace('window.BACKEND_URL = null;', `window.BACKEND_URL = "${backendUrl}";`);
+  
+    // Send the modified HTML
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving index.html:', error);
+    res.status(500).send('Error loading the page');
+  }
 });
 
 server.listen(PORT, function() {

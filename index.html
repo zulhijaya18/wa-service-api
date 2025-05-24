@@ -80,9 +80,17 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
     <script>
-        const socket = io();
+        // This line will be replaced by the server with the actual BACKEND_URL from environment variables
+        window.BACKEND_URL = null;
+        
+        // Connect to the backend URL based on environment
+        const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? '' // Empty means connect to same host in development
+            : window.BACKEND_URL || window.location.origin; // Use injected BACKEND_URL or fall back to the current origin
+            
+        const socket = io(backendUrl);
         const qrcode = document.getElementById('qrcode');
         const status = document.getElementById('status');
         const logs = document.getElementById('logs');
