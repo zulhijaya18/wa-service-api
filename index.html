@@ -82,15 +82,41 @@
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
     <script>
-        // This line will be replaced by the server with the actual BACKEND_URL from environment variables
+        // IMPORTANT: This value will be replaced by the server when running locally
+        // But when deployed to Netlify, you MUST set this URL in your Netlify environment variables
         window.BACKEND_URL = null;
         
-        // Connect to the backend URL based on environment
-        const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? '' // Empty means connect to same host in development
-            : window.BACKEND_URL || window.location.origin; // Use injected BACKEND_URL or fall back to the current origin
+        // Show connection status in the logs
+        addLog('Connecting to WhatsApp server...');
+        
+        // Determine which backend URL to use
+        let backendUrl;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Local development - connect to local server
+            backendUrl = '';
+            addLog('Using local server connection');
+        } else {
+            // Production - connect to the specified backend URL
+            backendUrl = window.BACKEND_URL;
             
-        const socket = io(backendUrl);
+            if (!backendUrl) {
+                // No backend URL provided
+                document.getElementById('status').textContent = 'Error: No backend URL configured';
+                document.getElementById('status').className = 'error';
+                addLog('Error: Backend URL not configured. Please set BACKEND_URL in Netlify environment variables.');
+                throw new Error('Backend URL not configured');
+            }
+            
+            addLog(`Connecting to backend at: ${backendUrl}`);
+        }
+        
+        // Configure Socket.IO with explicit options
+        const socket = io(backendUrl, {
+            path: '/socket.io/',
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
+            timeout: 10000
+        });
         const qrcode = document.getElementById('qrcode');
         const status = document.getElementById('status');
         const logs = document.getElementById('logs');
